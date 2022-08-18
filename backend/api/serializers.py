@@ -257,8 +257,27 @@ class FavouriteSerializer(serializers.ModelSerializer):
         model = Favourite
         fields = '__all__'
 
+    def validate(self, data):
+        request = self.context.get('request')
+        recipe = data['recipe']
+        if Favourite.objects.filter(user=request.user, recipe=recipe).exists():
+            raise serializers.ValidationError(
+                {'errors': 'Рецепт уже добавлен в избранное!'}
+            )
+        return data
+
 
 class ShoppingListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingList
         fields = '__all__'
+
+    def validate(self, data):
+        request = self.context.get('request')
+        recipe = data['recipe']
+        if ShoppingList.objects.filter(user=request.user,
+                                       recipe=recipe).exists():
+            raise serializers.ValidationError(
+                {'errors': 'Рецепт уже добавлен в список покупок!'}
+            )
+        return data

@@ -5,8 +5,22 @@ User = get_user_model()
 
 
 class Tag(models.Model):
+    BLUE = '#0000FF'
+    GREEN = '#008000'
+    PURPLE = '#800080'
+
+    PALETTE = [
+        (BLUE, 'Синий'),
+        (GREEN, 'Зеленый'),
+        (PURPLE, 'Фиолетовый'),
+    ]
+
     name = models.CharField('Тег', max_length=200, unique=True)
-    colour = models.CharField('Цвет', max_length=10, unique=True)
+    colour = models.CharField(
+        'Цвет',
+        max_length=10,
+        unique=True,
+        choices=PALETTE)
     slug = models.SlugField('Идентификатор', unique=True)
 
     class Meta:
@@ -108,13 +122,13 @@ class Favourite(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorite_user',
+        related_name='favorite',
         verbose_name='пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favorite_recipe',
+        related_name='favorite',
         verbose_name='рецепт'
     )
 
