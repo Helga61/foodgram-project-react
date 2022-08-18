@@ -131,7 +131,4 @@ dmypy.json
 # .idea
 .idea
 
-# Media objects
-foodgram_media/
-
 .vscode/
