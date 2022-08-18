@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'sorl.thumbnail',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     'djoser',
 ]
@@ -105,22 +105,20 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
 
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
-    ],
+    ),
 
-    'DEFAULT_PAGINATION_CLASS': 'api.pagination.PagePagination',
-    'PAGE_SIZE': 6,
+    'DEFAULT_PAGINATION_CLASS':
+        'api.pagination.PagePagination',
+        'PAGE_SIZE': 6,
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
-SIMPLE_JWT = {
-   'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-   'AUTH_HEADER_TYPES': ('Bearer',),
-}
-
 DJOSER = {
+    'LOGIN_FIELD': "email",
+    'HIDE_USERS': False,
     "SERIALIZERS": {
         "user": "api.serializers.CustomUserSerializer",
         "current_user": "api.serializers.CustomUserSerializer",
@@ -131,5 +129,4 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny'],
         'token_destroy': ['rest_framework.permissions.IsAuthenticated'],
     },
-    'HIDE_USERS': False
 }

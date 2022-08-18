@@ -24,7 +24,7 @@ class Ingredient(models.Model):
         'Единицы измерения', max_length=15)
 
     class Meta:
-        ordering = ['name']
+        ordering = ['pk']
         verbose_name = 'ингредиент'
         verbose_name_plural = 'ингредиенты'
 
@@ -55,7 +55,7 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Ингредиенты'
     )
-    tag = models.ManyToManyField(
+    tags = models.ManyToManyField(
         Tag,
         related_name='recipes',
         verbose_name='Теги'
@@ -81,7 +81,7 @@ class IngredientForRecipe(models.Model):
         related_name='ingredient_for_recipe',
         verbose_name='Ингредиент'
     )
-    quantity = models.PositiveSmallIntegerField('Количество')
+    amount = models.PositiveSmallIntegerField('Количество')
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -93,9 +93,15 @@ class IngredientForRecipe(models.Model):
         ordering = ['ingredient']
         verbose_name = 'Ингредиенты для рецепта'
         verbose_name_plural = 'Ингредиенты для рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='ingredient_for_recipe_unique'
+            ),
+        ]
 
     def __str__(self):
-        return f'{self.ingredient}: {self.quantity}'
+        return f'{self.ingredient}: {self.amount}'
 
 
 class Favourite(models.Model):

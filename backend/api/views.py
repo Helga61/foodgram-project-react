@@ -3,14 +3,14 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from recipes.models import Favourite, Ingredient, Recipe, ShoppingList, Tag
-from rest_framework import permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from users.models import Subscription
 
 from .pagination import PagePagination
-from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOnly
 from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeSerializer,
                           ShortRecipeSerializer, SubscriptionSerializer,
@@ -26,12 +26,12 @@ class CustomUserViewSet(UserViewSet):
 
     @action(
         detail=True,
-        methods=['get', 'delete'],
+        methods=['post', 'delete'],
         permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
         user = get_object_or_404(User, username=request.user.username)
         author = get_object_or_404(User, id=id)
-        if request.method == 'get':
+        if request.method == 'POST':
             if user == author:
                 return Response({
                     'errors': 'Нельзя подписаться на себя'
@@ -40,7 +40,6 @@ class CustomUserViewSet(UserViewSet):
                 return Response({
                     'errors': 'Вы уже подписались на этого пользователя'
                 }, status=status.HTTP_400_BAD_REQUEST)
-
             subscription = Subscription.objects.create(
                 user=user,
                 author=author)
@@ -83,23 +82,21 @@ class TagViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     permission_classes = (IsAdminOrReadOnly,)
     search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
 
     def get_serializer_class(self):
-        if self.request.method in permissions.SAFE_METHODS:
+        if self.request.method == 'GET':
             return RecipeSerializer
         return RecipeCreateSerializer
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
-    def perform_update(self, serializer):
         serializer.save(author=self.request.user)
 
     def create(self, request, *args, **kwargs):
@@ -114,29 +111,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
             out_serializer.data, status=status.HTTP_201_CREATED
         )
 
-    def update(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance = self.get_object()
-        self.perform_update(serializer)
-        serializer = self.get_serializer(
-            instance=instance,
-            data=request.data
-        )
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        instance = serializer.instance
-        out_serializer = RecipeSerializer(
-            instance=instance, context={"request": request}
-        )
-        return Response(out_serializer.data, status=status.HTTP_200_OK)
-
     def get_permissions(self):
         if (self.action == 'list' or self.action == 'retrieve'
                 or self.action == 'create'):
             permission_classes = [permissions.IsAuthenticatedOrReadOnly]
         else:
-            permission_classes = [IsAuthorOrReadOnly]
+            permission_classes = [IsAuthorOrAdminOrReadOnly]
         return [permission() for permission in permission_classes]
 
     def post_or_delete(self, request, model, error_data):
@@ -180,7 +160,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return None
 
     @action(detail=True, methods=["post", "delete"])
-    def shopping_list(self, request, **kwargs):
+    def shopping_cart(self, request, **kwargs):
         if request.method == "POST":
             model = ShoppingList
             error_data = {"errors": "Рецепт уже добавлен в список покупок"}
