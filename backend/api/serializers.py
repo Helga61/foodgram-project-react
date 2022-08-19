@@ -2,10 +2,11 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import (Favourite, Ingredient, IngredientForRecipe, Recipe,
-                            ShoppingList, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+
+from recipes.models import (Favourite, Ingredient, IngredientForRecipe, Recipe,
+                            ShoppingList, Tag)
 from users.models import Subscription
 
 User = get_user_model()
@@ -132,6 +133,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
+    """Короткая версия рецепта для избранноко и корзины"""
 
     class Meta:
         model = Recipe
@@ -140,6 +142,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания рецептов"""
     tags = TagSerializer(many=True, read_only=True)
     image = Base64ImageField()
     ingredients = IngredientForRecipeSerializer(
@@ -225,15 +228,28 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    """Сериализатор для подписок"""
+    id = serializers.ReadOnlyField(source='author.id')
+    email = serializers.ReadOnlyField(source='author.email')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Subscription
-        fields = '__all__'
+        fields = (
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count",
+        )
 
     def get_is_subscribed(self, obj):
         return Subscription.objects.filter(
@@ -253,6 +269,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class FavouriteSerializer(serializers.ModelSerializer):
+    """Сериализатор для избранных рецептов"""
     class Meta:
         model = Favourite
         fields = '__all__'
@@ -268,6 +285,7 @@ class FavouriteSerializer(serializers.ModelSerializer):
 
 
 class ShoppingListSerializer(serializers.ModelSerializer):
+    """Сериализатор для списка покупок"""
     class Meta:
         model = ShoppingList
         fields = '__all__'

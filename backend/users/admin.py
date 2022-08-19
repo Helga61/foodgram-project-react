@@ -7,12 +7,14 @@ from . import models
 
 class UserAdmin(BaseUserAdmin):
     list_display = (
-        "id",
-        "username",
-        "first_name",
-        "last_name",
-        "is_staff",
+        'id',
+        'email',
+        'username',
+        'first_name',
+        'last_name',
+        'is_staff',
     )
+    list_filter = ('username', 'email')
 
 
 @admin.register(models.Subscription)

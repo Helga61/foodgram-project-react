@@ -3,14 +3,14 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favourite, Ingredient, IngredientForRecipe, Recipe,
-                            ShoppingList, Tag)
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from users.models import Subscription
 
+from users.models import Subscription
+from recipes.models import (Favourite, Ingredient, IngredientForRecipe, Recipe,
+                            ShoppingList, Tag)
 from .pagination import PagePagination
 from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOnly
 from .serializers import (CustomUserSerializer, FavouriteSerializer,
@@ -47,10 +47,10 @@ class CustomUserViewSet(UserViewSet):
                 author=author)
             serializer = SubscriptionSerializer(
                 subscription,
-                context={"request": request},
+                context={'request': request},
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == "DELETE":
+        if request.method == 'DELETE':
             subscription = Subscription.objects.filter(
                 user=user,
                 author=author,
@@ -107,7 +107,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         instance = serializer.instance
         out_serializer = RecipeSerializer(
-            instance=instance, context={"request": request}
+            instance=instance, context={'request': request}
         )
         return Response(
             out_serializer.data, status=status.HTTP_201_CREATED
