@@ -56,7 +56,7 @@ class CustomUserViewSet(UserViewSet):
         return Response(*out_serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
-    def subscription_delete(self, request, id=None):
+    def unsubscribe(self, request, id=None):
         user = request.user
         author = get_object_or_404(User, id=id)
         subscription = Subscription.objects.filter(
@@ -196,11 +196,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'ingredient__measure_unit'
         ).order_by('ingredient__name').annotate(total=Sum('amount'))
         shopping_list = []
-        for ingredient in enumerate(all_ingredients):
+        for number, ingredient in enumerate(all_ingredients, 1):
             shopping_list.append(
-                f'{ingredient[0]}. {ingredient[1]["ingredient__name"]} - '
-                f'{ingredient[1]["total"]} '
-                f'{ingredient[1]["ingredient__measure_unit"]} \n'
+                f'{number}. {ingredient["ingredient__name"]} - '
+                f'{ingredient["total"]} '
+                f'{ingredient["ingredient__measure_unit"]} \n'
             )
         filename = 'shopping_list.txt'
         response = HttpResponse(shopping_list, content_type='text/plain')

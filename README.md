@@ -21,39 +21,34 @@ SECRET_KEY='testkey'
 DEBUG = Falce
 ```
 
-### Для локального запуска backend проекта:
+### Для локального запуска проекта:
 
 В корневой директории:
 
 * Cоздать и активировать виртуальное окружение:
 ```
 python -m venv venv
-
 source venv/Scripts/activate
 ```
 
 * Установить зависимости из файла requirements.txt:
 ```
 python -m pip install --upgrade pip
-
 pip install -r requirements.txt
 ```
 
-Перейти в директорию backend/
+* Перейти в директорию foodgram-project-react/infra/
 
-* Выполнить миграции:
+* Собрать и запустить проект
 ```
-python manage.py migrate
-```
-
-* Заполнить базу данных ингредиентами:
-```
-python manage.py import_ingredients
+docker-compose up -d --build
 ```
 
-* Запустить проект:
+Выполнить миграции, создать суперпользователя, наполнить базу
 ```
-python manage.py runserver
+docker-compose exec backend python manage.py migrate
+docker-compose exec backend python manage.py createsuperuser
+docker-compose exec backend python manage.py import_ingredients
 ```
 
 ## Автор
