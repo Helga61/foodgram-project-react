@@ -5,8 +5,10 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from recipes.models import (Favourite, Ingredient, IngredientForRecipe, Recipe,
-                            ShoppingList, Tag)
+from recipes.models import (
+    Favourite, Ingredient, IngredientForRecipe,
+    Recipe, ShoppingList, Tag,
+)
 from users.models import Subscription
 
 User = get_user_model()
@@ -74,14 +76,14 @@ class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра тегов"""
     class Meta:
         model = Tag
-        fields = '__all__'
+        fields = ('id', 'name', 'colour', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра ингредиентов"""
     class Meta:
         model = Ingredient
-        fields = '__all__'
+        fields = ('id', 'name', 'measure_unit')
 
 
 class IngredientForRecipeSerializer(serializers.ModelSerializer):
@@ -133,7 +135,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
-    """Короткая версия рецепта для избранноко и корзины"""
+    """Короткая версия рецепта для избранного и корзины"""
 
     class Meta:
         model = Recipe
@@ -153,7 +155,13 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('__all__')
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'image'
+        )
 
     def validate(self, data):
         name = str(self.initial_data.get('name')).strip()
@@ -190,12 +198,15 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         )
         for tag in tags:
             recipe.tags.add(get_object_or_404(Tag, pk=tag))
-        for ingredient in ingredients:
-            IngredientForRecipe.objects.create(
+        ingredient_list = [
+            IngredientForRecipe(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount')
             )
+            for ingredient in ingredients
+        ]
+        IngredientForRecipe.objects.bulk_create(objs=ingredient_list)
         return recipe
 
     def update(self, recipe, validated_data):
@@ -214,17 +225,39 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             recipe.tags.add(get_object_or_404(Tag, pk=tag))
         if ingredients:
             recipe.ingredients.clear()
-            for ingredient in ingredients:
-                ingredient_instance = get_object_or_404(
-                    Ingredient, pk=ingredient.get('id')
-                )
-                IngredientForRecipe.objects.create(
+            ingredient_list = [
+                IngredientForRecipe(
                     recipe=recipe,
-                    ingredient=ingredient_instance,
+                    ingredient=get_object_or_404(
+                        Ingredient, pk=ingredient.get('id')
+                    ),
                     amount=ingredient.get('amount')
                 )
+                for ingredient in ingredients
+            ]
+            IngredientForRecipe.objects.bulk_create(objs=ingredient_list)
         recipe.save()
         return recipe
+
+
+class SubscribeSerializer(serializers.ModelSerializer):
+    """Сериализатор для проверки полей подписки"""
+    class Meta:
+        model = Subscription
+        fields = ['id', 'user', 'author']
+
+    def validate(self, data):
+        author = data['author']
+        user = data['user']
+        if user == author:
+            raise serializers.ValidationError({
+                'errors': 'Нельзя подписаться на себя'}
+            )
+        if Subscription.objects.filter(user=user, author=author).exists():
+            raise serializers.ValidationError({
+                'errors': 'Вы уже подписались на этого пользователя'}
+                )
+        return data
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -241,14 +274,14 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = (
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-            "recipes",
-            "recipes_count",
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
         )
 
     def get_is_subscribed(self, obj):
@@ -272,7 +305,7 @@ class FavouriteSerializer(serializers.ModelSerializer):
     """Сериализатор для избранных рецептов"""
     class Meta:
         model = Favourite
-        fields = '__all__'
+        fields = ('id', 'user', 'recipe')
 
     def validate(self, data):
         request = self.context.get('request')
@@ -288,7 +321,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
     """Сериализатор для списка покупок"""
     class Meta:
         model = ShoppingList
-        fields = '__all__'
+        fields = ('id', 'user', 'recipe')
 
     def validate(self, data):
         request = self.context.get('request')

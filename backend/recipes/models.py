@@ -15,7 +15,7 @@ class Tag(models.Model):
         (PURPLE, 'Фиолетовый'),
     ]
 
-    name = models.CharField('Тег', max_length=200, unique=True)
+    name = models.CharField('Тег', max_length=20, unique=True)
     colour = models.CharField(
         'Цвет',
         max_length=10,
@@ -25,8 +25,8 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ['name']
-        verbose_name = 'тег'
-        verbose_name_plural = 'теги'
+        verbose_name = 'Тег'
+        verbose_name_plural = 'Теги'
 
     def __str__(self):
         return self.name
@@ -39,8 +39,8 @@ class Ingredient(models.Model):
 
     class Meta:
         ordering = ['pk']
-        verbose_name = 'ингредиент'
-        verbose_name_plural = 'ингредиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
         return self.name
@@ -81,8 +81,8 @@ class Recipe(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
-        verbose_name = 'рецепт'
-        verbose_name_plural = 'рецепты'
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
 
     def __str__(self):
         return self.name[:25]
@@ -100,7 +100,7 @@ class IngredientForRecipe(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         related_name='ingredient_for_recipe',
-        verbose_name='рецепт'
+        verbose_name='Рецепт'
     )
 
     class Meta:
@@ -123,13 +123,13 @@ class Favourite(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='favorite',
-        verbose_name='пользователь'
+        verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='favorite',
-        verbose_name='рецепт'
+        verbose_name='Рецепт'
     )
 
     class Meta:
@@ -148,13 +148,13 @@ class ShoppingList(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='shopping_list',
-        verbose_name='пользователь'
+        verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
         related_name='shopping_list',
-        verbose_name='рецепт'
+        verbose_name='Рецепт'
     )
 
     class Meta:
