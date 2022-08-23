@@ -4,25 +4,21 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
+from recipes.models import (Favourite, Ingredient, IngredientForRecipe, Recipe,
+                            ShoppingList, Tag)
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from users.models import Subscription
-from recipes.models import (
-    Favourite, Ingredient, IngredientForRecipe,
-    Recipe, ShoppingList, Tag,
-)
+
 from .pagination import PagePagination
 from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOnly
-from .serializers import (
-    CustomUserSerializer, FavouriteSerializer,
-    IngredientSerializer, RecipeCreateSerializer,
-    RecipeSerializer, ShoppingListSerializer,
-    ShortRecipeSerializer, SubscribeSerializer,
-    SubscriptionSerializer, TagSerializer,
-)
+from .serializers import (CustomUserSerializer, FavouriteSerializer,
+                          IngredientSerializer, RecipeCreateSerializer,
+                          RecipeSerializer, ShoppingListSerializer,
+                          ShortRecipeSerializer, SubscribeSerializer,
+                          SubscriptionSerializer, TagSerializer)
 
 User = get_user_model()
 
@@ -67,8 +63,8 @@ class CustomUserViewSet(UserViewSet):
             subscription.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response({
-                'errors': 'Вы не подписаны на этого автора'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            'errors': 'Вы не подписаны на этого автора'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
