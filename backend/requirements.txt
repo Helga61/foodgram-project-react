@@ -12,6 +12,6 @@ djangorestframework-simplejwt==4.7.2
 djoser==2.1.0
 django-filter==22.1
 django-extra-fields==3.0.2
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.3
 python-dotenv==0.20.0
 gunicorn==20.1.0
