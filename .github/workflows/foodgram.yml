@@ -61,11 +61,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
-            sudo docker pull helga61/foodgram_backend:latest
-            sudo docker pull helga61/foodgram_frontend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
-            sudo rm .env
+            sudo docker pull helga61/foodgram_backend:latest
+            sudo docker pull helga61/foodgram_frontend:latest
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
