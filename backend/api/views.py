@@ -94,7 +94,7 @@ class TagViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend, NameSearchFilter)
+    filter_backends = (DjangoFilterBackend, NameSearchFilter,)
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
     search_fields = ('^name',)
@@ -111,19 +111,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeCreateSerializer
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        return serializer.save()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        instance = serializer.instance
-        out_serializer = RecipeSerializer(
-            instance=instance, context={'request': request}
-        )
-        return Response(
-            out_serializer.data, status=status.HTTP_201_CREATED
-        )
+        return Response(RecipeSerializer(
+            self.perform_create(serializer),
+            context={'request': request}
+        ).data)
 
     def get_permissions(self):
         if (self.action == 'list' or self.action == 'retrieve'
