@@ -4,21 +4,26 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favourite, Ingredient, IngredientForRecipe, Recipe,
-                            ShoppingList, Tag)
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from users.models import Subscription
 
+from recipes.models import (
+    Favourite, Ingredient, IngredientForRecipe,
+    Recipe, ShoppingList, Tag
+)
+from users.models import Subscription
+from .filters import NameSearchFilter, RecipeFilter
 from .pagination import PagePagination
 from .permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOnly
-from .serializers import (CustomUserSerializer, FavouriteSerializer,
-                          IngredientSerializer, RecipeCreateSerializer,
-                          RecipeSerializer, ShoppingListSerializer,
-                          ShortRecipeSerializer, SubscribeSerializer,
-                          SubscriptionSerializer, TagSerializer)
+from .serializers import (
+    CustomUserSerializer, FavouriteSerializer,
+    IngredientSerializer, RecipeCreateSerializer,
+    RecipeSerializer, ShoppingListSerializer,
+    ShortRecipeSerializer, SubscribeSerializer,
+    SubscriptionSerializer, TagSerializer
+)
 
 User = get_user_model()
 
@@ -89,7 +94,7 @@ class TagViewSet(viewsets.ModelViewSet):
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (DjangoFilterBackend, NameSearchFilter)
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
     search_fields = ('^name',)
@@ -98,6 +103,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    filter_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
