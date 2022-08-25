@@ -7,7 +7,7 @@ User = get_user_model()
 
 class Tag(models.Model):
     name = models.CharField('Тег', max_length=20, unique=True)
-    colour = models.CharField(
+    color = models.CharField(
         'Цвет в Hex',
         max_length=10
     )
