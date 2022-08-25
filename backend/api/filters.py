@@ -1,14 +1,18 @@
 from django.contrib.auth import get_user_model
-from django_filters.rest_framework import FilterSet, filters
+from django_filters.rest_framework import CharFilter, FilterSet, filters
 from rest_framework.filters import SearchFilter
 
-from recipes.models import Recipe
+from recipes.models import Ingredient, Recipe
 
 User = get_user_model()
 
 
-class NameSearchFilter(SearchFilter):
-    search_param = 'name'
+class NameSearchFilter(FilterSet):
+    name = CharFilter(field_name='name', lookup_expr='icontains')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
 
 
 class RecipeFilter(FilterSet):
