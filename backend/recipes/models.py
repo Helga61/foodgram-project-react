@@ -10,7 +10,7 @@ class Tag(models.Model):
     colour = models.CharField(
         'Цвет в Hex',
         max_length=10
-        )
+    )
     slug = models.SlugField('Идентификатор', unique=True)
 
     class Meta:
