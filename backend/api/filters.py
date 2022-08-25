@@ -12,26 +12,29 @@ class NameSearchFilter(SearchFilter):
 
 
 class RecipeFilter(FilterSet):
-    tags = filters.ModelMultipleChoiceFilter(
+    tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug',
-        queryset=Tag.objects.all(),
-        to_field_name='slug',
+        label='tags'
     )
-    is_favorited = filters.BooleanFilter(method='filter_is_favorited')
+    is_favorited = filters.BooleanFilter(
+        method='get_is_favorited',
+        label='is_favorited'
+    )
     is_in_shopping_cart = filters.BooleanFilter(
-        method='filter_is_in_shopping_cart'
+        method='get_is_in_shopping_cart',
+        label='is_in_shopping_cart'
     )
 
     class Meta:
         model = Recipe
         fields = ('tags', 'author', 'is_favorited', 'is_in_shopping_cart')
 
-    def filter_is_favorited(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
-            return queryset.filter(favorite__user=self.request.user)
+    def get_is_favorited(self, queryset, name, value):
+        if value:
+            return Recipe.objects.filter(favorite__user=self.request.user)
         return queryset
 
-    def filter_is_in_shopping_cart(self, queryset, name, value):
-        if value and not self.request.user.is_anonymous:
+    def get_is_in_shopping_cart(self, queryset, name, value):
+        if value:
             return Recipe.objects.filter(shopping_list__user=self.request.user)
         return queryset

@@ -98,6 +98,16 @@ class IngredientForRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measure_unit', 'amount')
 
 
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+    """Короткая версия рецепта для избранного и корзины"""
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+        read_only_fields = ('id', 'name', 'image', 'cooking_time')
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для рецептов"""
     author = CustomUserSerializer(read_only=True)
@@ -118,29 +128,25 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Recipe.objects.filter(
-            favorite__user=request.user, id=obj.id
-        ).exists()
+        user = request.user
+        return (
+            user.is_authenticated
+            and Favourite.objects.filter(
+                user=user,
+                recipe=obj,
+            ).exists()
+        )
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Recipe.objects.filter(
-            shopping_list__user=request.user, id=obj.id
-        ).exists()
-
-
-class ShortRecipeSerializer(serializers.ModelSerializer):
-    image = Base64ImageField()
-    """Короткая версия рецепта для избранного и корзины"""
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
-        read_only_fields = ('id', 'name', 'image', 'cooking_time')
+        user = request.user
+        return (
+            user.is_authenticated
+            and ShoppingList.objects.filter(
+                user=user,
+                recipe=obj,
+            ).exists()
+        )
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -314,6 +320,11 @@ class FavouriteSerializer(serializers.ModelSerializer):
                 {'errors': 'Рецепт уже добавлен в избранное!'}
             )
         return data
+    
+    def show_favorites(self, instance):
+        request = self.context.get('request')
+        context = {'request': request}
+        return ShortRecipeSerializer(instance.recipe, context=context).data
 
 
 class ShoppingListSerializer(serializers.ModelSerializer):
@@ -331,3 +342,8 @@ class ShoppingListSerializer(serializers.ModelSerializer):
                 {'errors': 'Рецепт уже добавлен в список покупок!'}
             )
         return data
+
+    def show_favorites(self, instance):
+        request = self.context.get('request')
+        context = {'request': request}
+        return ShortRecipeSerializer(instance.recipe, context=context).data
