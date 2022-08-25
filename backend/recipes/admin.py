@@ -31,4 +31,4 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(models.Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'colour')
+    list_display = ('name', 'slug', 'color')

@@ -77,7 +77,7 @@ class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра тегов"""
     class Meta:
         model = Tag
-        fields = ('id', 'name', 'color', 'slug')
+        fields = ('id', 'name', 'colour', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
