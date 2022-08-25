@@ -320,11 +320,6 @@ class FavouriteSerializer(serializers.ModelSerializer):
                 {'errors': 'Рецепт уже добавлен в избранное!'}
             )
         return data
-    
-    def show_favorites(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
-        return ShortRecipeSerializer(instance.recipe, context=context).data
 
 
 class ShoppingListSerializer(serializers.ModelSerializer):
@@ -342,8 +337,3 @@ class ShoppingListSerializer(serializers.ModelSerializer):
                 {'errors': 'Рецепт уже добавлен в список покупок!'}
             )
         return data
-
-    def show_favorites(self, instance):
-        request = self.context.get('request')
-        context = {'request': request}
-        return ShortRecipeSerializer(instance.recipe, context=context).data
