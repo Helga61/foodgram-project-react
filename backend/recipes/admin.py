@@ -11,7 +11,7 @@ class IngredientRecipe(admin.TabularInline):
 
 @admin.register(models.Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'measure_unit')
+    list_display = ('pk', 'name', 'measurement_unit')
     search_fields = ('name',)
     list_filter = ('name',)
 

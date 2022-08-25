@@ -193,14 +193,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         all_ingredients = IngredientForRecipe.objects.filter(
             recipe__shopping_list__user=request.user).values(
             'ingredient__name',
-            'ingredient__measure_unit'
+            'ingredient__measurement_unit'
         ).order_by('ingredient__name').annotate(total=Sum('amount'))
         shopping_list = []
         for number, ingredient in enumerate(all_ingredients, 1):
             shopping_list.append(
                 f'{number}. {ingredient["ingredient__name"]} - '
                 f'{ingredient["total"]} '
-                f'{ingredient["ingredient__measure_unit"]} \n'
+                f'{ingredient["ingredient__measurement_unit"]} \n'
             )
         filename = 'shopping_list.txt'
         response = HttpResponse(shopping_list, content_type='text/plain')

@@ -84,19 +84,19 @@ class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для просмотра ингредиентов"""
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measure_unit')
+        fields = ('id', 'name', 'measurement_unit')
 
 
 class IngredientForRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для ингредиентов рецепта"""
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
-    measure_unit = serializers.ReadOnlyField(
-        source='ingredient.measure_unit')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredient.measurement_unit')
 
     class Meta:
         model = IngredientForRecipe
-        fields = ('id', 'name', 'measure_unit', 'amount')
+        fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
