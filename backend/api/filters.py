@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class NameSearchFilter(FilterSet):
-    name = CharFilter(field_name='name', lookup_expr='starts_with')
+    name = CharFilter(field_name='name', lookup_expr='startswith')
 
     class Meta:
         model = Ingredient
