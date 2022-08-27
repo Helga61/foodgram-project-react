@@ -8,9 +8,8 @@ services:
       - ./.env
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: helga61/foodgram-backend:latest
+    restart: always
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
@@ -20,9 +19,8 @@ services:
       - ./.env
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: helga61/foodgram-frontend:latest
+    restart: always
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
