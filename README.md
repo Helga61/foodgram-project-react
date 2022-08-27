@@ -38,7 +38,6 @@ git@github.com:Helga61/foodgram-project-react.git
 - В директории infra/ создать файл .env, наполнить по шаблону:
 ```
 SECRET_KEY='testkey'
-DEBUG = Falce
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=postgres
 POSTGRES_USER=postgres
